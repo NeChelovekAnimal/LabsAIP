@@ -1,0 +1,107 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+// Функция для подготовки входного файла с 100 случайными числами
+void generateInputFile(const std::string& inputFileName) {
+    std::ofstream inputFile(inputFileName);
+    if (!inputFile) {
+        std::cerr << "Ошибка открытия файла для записи: " << inputFileName << std::endl;
+        return;
+    }
+
+    std::srand(std::time(nullptr)); // Инициализация генератора случайных чисел
+
+    // Генерация 100 случайных чисел в диапазоне от -50 до 50
+    for (int i = 0; i < 100; ++i) {
+        int randomNum = std::rand() % 101 - 50; // Генерация числа в диапазоне [-50, 50]
+        inputFile << randomNum << std::endl;
+    }
+
+    inputFile.close();
+}
+
+// Функция для обработки входного файла и записи в выходной файл
+void processFile(const std::string& inputFileName, const std::string& outputFileName) {
+    std::ifstream inputFile(inputFileName);
+    if (!inputFile) {
+        std::cerr << "Ошибка открытия файла для чтения: " << inputFileName << std::endl;
+        return;
+    }
+
+    std::vector<int> numbers;
+    int num;
+
+    // Чтение чисел из входного файла
+    while (inputFile >> num) {
+        numbers.push_back(num);
+    }
+    inputFile.close();
+
+    // Проверка наличия данных
+    if (numbers.empty()) {
+        std::cerr << "Входной файл пуст!" << std::endl;
+        return;
+    }
+
+    // Поиск первого и последнего отрицательных чисел
+    int firstNegative = 0;
+    int lastNegative = 0;
+    bool foundFirstNegative = false;
+
+    for (int n : numbers) {
+        if (n < 0) {
+            if (!foundFirstNegative) {
+                firstNegative = n;
+                foundFirstNegative = true;
+            }
+            lastNegative = n;
+        }
+    }
+
+    // Проверяем, нашли ли отрицательные числа
+    if (!foundFirstNegative) {
+        std::cerr << "Нет отрицательных чисел в массиве!" << std::endl;
+        return;
+    }
+
+    // Вычисляем удвоенную сумму первого и последнего отрицательных чисел
+    int multiplier = 2 * (firstNegative + lastNegative);
+
+    // Обработка чисел: умножение каждого третьего числа
+    for (size_t i = 0; i < numbers.size(); ++i) {
+        if ((i + 1) % 3 == 0) { // Каждое третье число (индексы 2, 5, 8 и т.д.)
+            numbers[i] *= multiplier;
+        }
+    }
+
+    // Запись результатов в выходной файл
+    std::ofstream outputFile(outputFileName);
+    if (!outputFile) {
+        std::cerr << "Ошибка открытия файла для записи: " << outputFileName << std::endl;
+        return;
+    }
+
+    for (int n : numbers) {
+        outputFile << n << std::endl;
+    }
+
+    outputFile.close();
+}
+
+int main() {
+    std::string inputFileName = "input.txt";
+    std::string outputFileName = "output.txt";
+
+    // Генерация входного файла
+    generateInputFile(inputFileName);
+
+    // Обработка файла и создание выходного файла
+    processFile(inputFileName, outputFileName);
+
+    std::cout << "Обработка завершена. Проверьте файлы: " << inputFileName << " и " << outputFileName << std::endl;
+
+    return 0;
+}
