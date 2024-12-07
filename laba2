@@ -1,0 +1,164 @@
+#include <iostream>
+#include <initializer_list>
+#include <stdexcept>
+
+namespace containers {
+
+    // Шаблонная структура Node
+    template <typename T>
+    struct Node {
+        T value;       // Значение элемента
+        int priority;  // Приоритет элемента
+        Node* next;    // Указатель на следующий элемент
+
+        // Приватный конструктор, доступный только для PQueue
+    private:
+        Node(const T& value, int priority) : value(value), priority(priority), next(nullptr) {}
+
+        // Дружественный класс для доступа к Node
+        template <typename U>
+        friend class PQueue;
+    };
+
+    // Шаблонный класс PQueue - очередь с приоритетами
+    template <typename T>
+    class PQueue {
+    private:
+        Node<T>* head; // Указатель на начало очереди
+
+    public:
+        // Конструктор по умолчанию
+        PQueue() : head(nullptr) {}
+
+        // Конструктор от std::initializer_list<T>
+        PQueue(std::initializer_list<std::pair<T, int>> list) : head(nullptr) {
+            for (const auto& element : list) {
+                enqueue(element.first, element.second);
+            }
+        }
+
+        // Конструктор копирования
+        PQueue(const PQueue& other) : head(nullptr) {
+            Node<T>* current = other.head;
+            while (current) {
+                enqueue(current->value, current->priority);
+                current = current->next;
+            }
+        }
+
+        // Оператор присваивания копированием
+        PQueue& operator=(const PQueue& other) {
+            if (this != &other) {
+                clear();
+                Node<T>* current = other.head;
+                while (current) {
+                    enqueue(current->value, current->priority);
+                    current = current->next;
+                }
+            }
+            return *this;
+        }
+
+        // Конструктор перемещения
+        PQueue(PQueue&& other) noexcept : head(other.head) {
+            other.head = nullptr;
+        }
+
+        // Оператор присваивания перемещением
+        PQueue& operator=(PQueue&& other) noexcept {
+            if (this != &other) {
+                clear();
+                head = other.head;
+                other.head = nullptr;
+            }
+            return *this;
+        }
+
+        // Деструктор
+        ~PQueue() {
+            clear();
+        }
+
+        // Метод добавления элемента в очередь
+        void enqueue(const T& value, int priority) {
+            Node<T>* newNode = new Node<T>(value, priority);
+
+            if (!head || head->priority < priority) {
+                newNode->next = head;
+                head = newNode;
+                return;
+            }
+
+            Node<T>* current = head;
+            while (current->next && current->next->priority >= priority) {
+                current = current->next;
+            }
+
+            newNode->next = current->next;
+            current->next = newNode;
+        }
+
+        // Метод удаления элемента с наивысшим приоритетом
+        T dequeue() {
+            if (!head) {
+                throw std::runtime_error("Queue is empty");
+            }
+
+            Node<T>* temp = head;
+            T value = head->value;
+            head = head->next;
+            delete temp;
+            return value;
+        }
+
+        // Метод проверки, пуста ли очередь
+        bool isEmpty() const {
+            return head == nullptr;
+        }
+
+        // Метод очистки очереди
+        void clear() {
+            while (head) {
+                Node<T>* temp = head;
+                head = head->next;
+                delete temp;
+            }
+        }
+
+        // Метод вывода содержимого очереди
+        void print() const {
+            Node<T>* current = head;
+            while (current) {
+                std::cout << "(" << current->value << ", " << current->priority << ") ";
+                current = current->next;
+            }
+            std::cout << std::endl;
+        }
+    };
+
+} // namespace containers
+
+int main() {
+    using namespace containers;
+
+    // Пример работы с PQueue
+    PQueue<int> queue;
+
+    queue.enqueue(10, 2);
+    queue.enqueue(20, 5);
+    queue.enqueue(15, 3);
+
+    std::cout << "Очередь после добавления элементов: ";
+    queue.print();
+
+    std::cout << "Извлечение элемента: " << queue.dequeue() << std::endl;
+
+    std::cout << "Очередь после извлечения: ";
+    queue.print();
+
+    queue.enqueue(25, 4);
+    std::cout << "Очередь после добавления элемента: ";
+    queue.print();
+
+    return 0;
+}
