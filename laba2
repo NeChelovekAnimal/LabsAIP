@@ -4,27 +4,27 @@
 
 namespace containers {
 
-    // Шаблонная структура Node
+   
     template <typename T>
     struct Node {
         T value;       // Значение элемента
         int priority;  // Приоритет элемента
         Node* next;    // Указатель на следующий элемент
 
-        // Приватный конструктор, доступный только для PQueue
+        
     private:
         Node(const T& value, int priority) : value(value), priority(priority), next(nullptr) {}
 
-        // Дружественный класс для доступа к Node
+       
         template <typename U>
         friend class PQueue;
     };
 
-    // Шаблонный класс PQueue - очередь с приоритетами
+   
     template <typename T>
     class PQueue {
     private:
-        Node<T>* head; // Указатель на начало очереди
+        Node<T>* head; 
 
     public:
         // Конструктор по умолчанию
