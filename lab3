@@ -1,0 +1,27 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+
+// Определяем манипулятор для вывода сообщения
+std::ostream& message(std::ostream& os) {
+    os << ">>> Custom message: ";
+    return os;
+}
+
+// Определяем манипулятор для установки шестнадцатеричного вывода и символа заполнения '$'
+std::ostream& hex_with_fill(std::ostream& os) {
+    os << std::hex << std::setfill('$');
+    return os;
+}
+
+int main() {
+    int num = 1009; // Пример числа для вывода
+
+    // Используем первый манипулятор для вывода сообщения
+    std::cout << message << "This is a test message." << std::endl;
+
+    // Используем второй манипулятор для вывода числа в шестнадцатеричном формате
+    std::cout << hex_with_fill << std::setw(8) << num << std::endl;
+
+    return 0;
+}
